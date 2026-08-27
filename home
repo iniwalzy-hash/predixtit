@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>Match Predictor by Walzy - Pro Engine</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #eab308;
+            --purple: #a855f7;
+            --orange: #f97316;
+            --btn-reset: #ef4444;
+            --btn-reset-hover: #dc2626;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            padding: 15px; 
+            line-height: 1.5; 
+        }
+
+        .container { 
+            max-width: 1250px; 
+            margin: 0 auto; 
+            width: 100%;
+        }
+
+        h1 { 
+            text-align: center; 
+            color: var(--accent); 
+            margin-bottom: 20px; 
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            letter-spacing: 0.5px; 
+        }
+        
+        /* LAYOUT FLEX & GRID RESPONSID */
+        .grid-layout { 
+            display: grid; 
+            grid-template-columns: 360px 1fr; 
+            gap: 20px; 
+        }
+
+        .card { 
+            background-color: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 12px; 
+            padding: 16px; 
+            margin-bottom: 20px; 
+        }
+
+        .card-title { 
+            font-size: 1.05rem; 
+            color: var(--accent); 
+            margin-bottom: 15px; 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 8px; 
+            font-weight: 600; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+        
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid var(--border-color); 
+            background: #0f172a; 
+            color: #fff; 
+            font-size: 0.95rem; 
+        }
+
+        input:focus { outline: none; border-color: var(--accent); }
+
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        
+        button.btn-submit { 
+            flex: 2;
+            padding: 12px; 
+            border-radius: 8px; 
+            border: none; 
+            background: var(--accent); 
+            color: #0f172a; 
+            font-weight: bold; 
+            font-size: 0.95rem; 
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+        button.btn-submit:hover { background: var(--accent-hover); color: #fff; }
+
+        button.btn-reset { 
+            flex: 1;
+            padding: 12px; 
+            border-radius: 8px; 
+            border: none; 
+            background: var(--btn-reset); 
+            color: #fff; 
+            font-weight: bold; 
+            font-size: 0.95rem; 
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+        button.btn-reset:hover { background: var(--btn-reset-hover); }
+
+        /* PICKS GRID FLEXIBLE */
+        .picks-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+
+        .pick-card { 
+            background: #0f172a; 
+            border: 1px solid var(--border-color); 
+            border-radius: 10px; 
+            padding: 15px; 
+            text-align: left; 
+            position: relative; 
+        }
+
+        .pick-card.primary { border-color: var(--accent); }
+        .pick-card.safe { border-color: var(--green); }
+        .pick-card.value { border-color: var(--purple); }
+        .pick-card.decision { border-color: var(--orange); }
+        
+        .pick-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+        .tag-primary { background: rgba(56, 189, 248, 0.2); color: var(--accent); }
+        .tag-safe { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+        .tag-value { background: rgba(168, 85, 247, 0.2); color: var(--purple); }
+        .tag-decision { background: rgba(249, 115, 22, 0.2); color: var(--orange); }
+
+        .pick-name { font-size: 1rem; font-weight: bold; color: #fff; margin-bottom: 4px; word-break: break-word; }
+        .pick-details { font-size: 0.82rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-top: 6px; border-top: 1px dashed var(--border-color); padding-top: 6px; }
+        .roi-positive { color: var(--green); font-weight: bold; }
+        .roi-negative { color: var(--red); font-weight: bold; }
+
+        .badge-pick { background: var(--green); color: #0f172a; font-weight: 800; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-block; }
+        .badge-nopick { background: var(--red); color: #fff; font-weight: 800; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-block; }
+
+        /* SIMILAR MATCHES */
+        .similar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+        .similar-card { background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; }
+        .similar-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
+        .similar-matchup { font-size: 0.9rem; font-weight: bold; color: #fff; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
+        .similar-score { background: var(--accent); color: #0f172a; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.85rem; white-space: nowrap; }
+        .similar-odds { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 6px; margin-top: 6px; flex-wrap: wrap; gap: 4px; }
+        .similarity-badge { background: rgba(34, 197, 94, 0.2); color: var(--green); font-size: 0.75rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
+        .empty-placeholder { text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 15px; grid-column: 1 / -1; }
+
+        .table-container { max-height: 300px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; min-width: 500px; }
+        th { background: #0f172a; color: var(--accent); padding: 10px; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-color); }
+        td { padding: 8px 10px; border-bottom: 1px solid var(--border-color); }
+        tr:hover { background: #26334d; }
+
+        /* MEDIA QUERIES KHUSUS HP (HANDPHONE) */
+        @media (max-width: 900px) { 
+            .grid-layout { 
+                grid-template-columns: 1fr; 
+            } 
+            h1 { font-size: 1.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .card { padding: 12px; }
+            .row-3 { grid-template-columns: 1fr; }
+            .picks-grid { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: column; }
+            button.btn-submit, button.btn-reset { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Match Predictor by Walzy</h1>
+
+    <div class="grid-layout">
+        <!-- FORM INPUT -->
+        <div class="card">
+            <div class="card-title">Match & Odds Input</div>
+            
+            <div class="form-group">
+                <label>Tim Bertanding</label>
+                <div class="row-2">
+                    <div>
+                        <label style="font-size:0.75rem; margin-bottom:2px;">Home Team</label>
+                        <input type="text" id="homeTeam" placeholder="Nama Tim Home">
+                    </div>
+                    <div>
+                        <label style="font-size:0.75rem; margin-bottom:2px;">Away Team</label>
+                        <input type="text" id="awayTeam" placeholder="Nama Tim Away">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Odds 1X2 (Home / Draw / Away)</label>
+                <div class="row-3">
+                    <input type="number" step="0.01" id="oddsHome" placeholder="Home">
+                    <input type="number" step="0.01" id="oddsDraw" placeholder="Draw">
+                    <input type="number" step="0.01" id="oddsAway" placeholder="Away">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Handicap Line Pasaran (Home)</label>
+                <input type="number" step="0.25" id="lineAH" placeholder="Contoh: -0.25">
+            </div>
+
+            <div class="form-group">
+                <label>Total Goal Pasaran (Over / Under Line)</label>
+                <input type="number" step="0.25" id="lineOU" placeholder="Contoh: 2.75">
+            </div>
+
+            <div class="form-group">
+                <label>Odds Over / Under Pasaran</label>
+                <div class="row-2">
+                    <input type="number" step="0.01" id="oddsOver" placeholder="Odds Over">
+                    <input type="number" step="0.01" id="oddsUnder" placeholder="Odds Under">
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn-submit" onclick="calculatePredictions()">Hitung & Analisis</button>
+                <button type="button" class="btn-reset" onclick="clearAllInputs()">Reset Odds</button>
+            </div>
+        </div>
+
+        <!-- OUTPUT RESULTS -->
+        <div>
+            <!-- PICKS & ROI CARDS -->
+            <div class="picks-grid">
+                <div class="pick-card primary">
+                    <span class="pick-tag tag-primary">Main Pick (AH)</span>
+                    <div class="pick-name" id="mainPickAH">-</div>
+                    <div class="pick-details">
+                        <span>Win Prob: <b id="mainAHProb">-</b></span>
+                        <span>Est. ROI: <b id="mainAHROI" class="roi-positive">-</b></span>
+                    </div>
+                </div>
+
+                <div class="pick-card primary">
+                    <span class="pick-tag tag-primary">Main Pick (O/U)</span>
+                    <div class="pick-name" id="mainPickOU">-</div>
+                    <div class="pick-details">
+                        <span>Win Prob: <b id="mainOUProb">-</b></span>
+                        <span>Est. ROI: <b id="mainOUROI" class="roi-positive">-</b></span>
+                    </div>
+                </div>
+
+                <div class="pick-card safe">
+                    <span class="pick-tag tag-safe">Safe Alternative</span>
+                    <div class="pick-name" id="safePick">-</div>
+                    <div class="pick-details">
+                        <span>Win Prob: <b id="safeProb">-</b></span>
+                        <span>Est. ROI: <b id="safeROI" class="roi-positive">-</b></span>
+                    </div>
+                </div>
+
+                <div class="pick-card value">
+                    <span class="pick-tag tag-value">Best Value Bet</span>
+                    <div class="pick-name" id="valuePick">-</div>
+                    <div class="pick-details">
+                        <span>Win Prob: <b id="valueProb">-</b></span>
+                        <span>Est. ROI: <b id="valueROI" class="roi-positive">-</b></span>
+                    </div>
+                </div>
+
+                <div class="pick-card decision">
+                    <span class="pick-tag tag-decision">Rekomendasi Utama & Skor</span>
+                    <div class="pick-name" id="decisionAction">-</div>
+                    <div class="pick-details">
+                        <span>Pasaran: <b id="marketTightness">-</b></span>
+                        <span>Prediksi Skor: <b id="scorePick" style="color:var(--yellow);">-</b></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SIMILAR MATCHES CARD -->
+            <div class="card">
+                <div class="card-title">
+                    <span>1xBet Similar Matches</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">Historical Archive</span>
+                </div>
+                <div class="similar-grid" id="similarMatchesContainer">
+                    <div class="empty-placeholder">-</div>
+                </div>
+            </div>
+
+            <!-- TABLE RANGE HANDICAP -->
+            <div class="card">
+                <div class="card-title">Range Analysis Handicap (+5.00 s/d -5.00)</div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Line AH</th>
+                                <th>Rekomendasi Pick</th>
+                                <th>Prob. Win</th>
+                                <th>Est. ROI</th>
+                                <th>Status Pasaran</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableAHBody">
+                            <tr><td colspan="5" style="text-align:center;">-</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TABLE RANGE GOAL -->
+            <div class="card">
+                <div class="card-title">Range Analysis Goal (0.00 s/d 5.00)</div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Goal Line</th>
+                                <th>Estimasi Pick</th>
+                                <th>Prob. Over</th>
+                                <th>Prob. Under</th>
+                                <th>Est. ROI Over</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableOUBody">
+                            <tr><td colspan="5" style="text-align:center;">-</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+// DATABASE HISTORIS DARI 1XBET
+const ONEXBET_HISTORICAL_DB = [
+    { date: "15 Jan 2026", match: "Real Sociedad vs Athletic Bilbao", league: "La Liga", oH: 2.15, oD: 3.40, oA: 3.30, lineAH: -0.25, lineOU: 2.75, score: "2 - 1" },
+    { date: "08 Feb 2026", match: "AC Milan vs AS Roma", league: "Serie A", oH: 2.05, oD: 3.50, oA: 3.50, lineAH: -0.25, lineOU: 2.75, score: "1 - 1" },
+    { date: "22 Nov 2025", match: "Tottenham vs Chelsea", league: "Premier League", oH: 2.20, oD: 3.60, oA: 3.10, lineAH: -0.25, lineOU: 3.00, score: "1 - 2" },
+    { date: "03 Des 2025", match: "Bayer Leverkusen vs RB Leipzig", league: "Bundesliga", oH: 2.10, oD: 3.75, oA: 3.20, lineAH: -0.25, lineOU: 2.75, score: "3 - 2" },
+    { date: "18 Okt 2025", match: "Marseille vs Lyon", league: "Ligue 1", oH: 2.00, oD: 3.40, oA: 3.60, lineAH: -0.50, lineOU: 2.50, score: "3 - 0" },
+    { date: "10 Mar 2026", match: "Man City vs Liverpool", league: "Premier League", oH: 1.85, oD: 3.90, oA: 3.80, lineAH: -0.50, lineOU: 3.25, score: "1 - 1" },
+    { date: "27 Jan 2026", match: "Juventus vs Inter Milan", league: "Serie A", oH: 2.60, oD: 3.20, oA: 2.75, lineAH: 0.00, lineOU: 2.25, score: "0 - 1" },
+    { date: "14 Feb 2026", match: "PSG vs Monaco", league: "Ligue 1", oH: 1.45, oD: 4.80, oA: 6.50, lineAH: -1.25, lineOU: 3.50, score: "5 - 2" },
+    { date: "01 Nov 2025", match: "Bayern Munich vs Dortmund", league: "Bundesliga", oH: 1.55, oD: 4.50, oA: 5.25, lineAH: -1.00, lineOU: 3.50, score: "4 - 2" },
+    { date: "03 Sep 2025", match: "Arsenal vs Man United", league: "Premier League", oH: 1.95, oD: 3.60, oA: 3.70, lineAH: -0.50, lineOU: 2.75, score: "3 - 1" }
+];
+
+function factorial(n) { return n <= 1 ? 1 : n * factorial(n - 1); }
+function poissonProb(k, lambda) { return (Math.pow(lambda, k) * Math.exp(-lambda)) / factorial(k); }
+function poissonCDF(k, lambda) { let sum = 0; for (let i = 0; i <= k; i++) sum += poissonProb(i, lambda); return sum; }
+
+function getDixonColesProb(hG, aG, homeXG, awayXG) {
+    let pBase = poissonProb(hG, homeXG) * poissonProb(aG, awayXG);
+    let rho = -0.13;
+    let tau = 1.0;
+
+    if (hG === 0 && aG === 0) tau = 1 - (homeXG * awayXG * rho);
+    else if (hG === 1 && aG === 0) tau = 1 + (awayXG * rho);
+    else if (hG === 0 && aG === 1) tau = 1 + (homeXG * rho);
+    else if (hG === 1 && aG === 1) tau = 1 - rho;
+
+    return pBase * Math.max(0, tau);
+}
+
+function getPoissonOU(totalXG, line) {
+    let floorL = Math.floor(line);
+    let remainder = line % 1;
+    if (remainder === 0) {
+        let pUnder = poissonCDF(floorL - 1, totalXG);
+        let pOver = 1 - poissonCDF(floorL, totalXG);
+        return { over: pOver / (pOver + pUnder || 1), under: pUnder / (pOver + pUnder || 1) };
+    } else if (remainder === 0.5) {
+        let pUnder = poissonCDF(floorL, totalXG);
+        return { over: 1 - pUnder, under: pUnder };
+    } else if (remainder === 0.25) {
+        let o20 = getPoissonOU(totalXG, floorL);
+        let o25 = getPoissonOU(totalXG, floorL + 0.5);
+        return { over: (o20.over + o25.over) / 2, under: (o20.under + o25.under) / 2 };
+    } else {
+        let o25 = getPoissonOU(totalXG, floorL + 0.5);
+        let o30 = getPoissonOU(totalXG, floorL + 1.0);
+        return { over: (o25.over + o30.over) / 2, under: (o25.under + o30.under) / 2 };
+    }
+}
+
+function normalCDF(x, mean = 0, std = 1.35) {
+    let z = (x - mean) / std;
+    let t = 1 / (1 + 0.2316419 * Math.abs(z));
+    let d = 0.3989423 * Math.exp(-z * z / 2);
+    let p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.3302744))));
+    return z > 0 ? 1 - p : p;
+}
+
+function calcROI(probWin, decimalOdds) {
+    if (!decimalOdds || decimalOdds <= 0) return 0;
+    return (probWin * decimalOdds - 1) * 100;
+}
+
+function formatROI(roi) {
+    let classStyle = roi >= 0 ? "roi-positive" : "roi-negative";
+    let sign = roi >= 0 ? "+" : "";
+    return `<span class="${classStyle}">${sign}${roi.toFixed(1)}%</span>`;
+}
+
+function findSimilarMatches(inputH, inputD, inputA, inputAH, inputOU) {
+    let matches = ONEXBET_HISTORICAL_DB.map(m => {
+        let distance = Math.sqrt(
+            Math.pow(m.oH - inputH, 2) +
+            Math.pow(m.oD - inputD, 2) +
+            Math.pow(m.oA - inputA, 2) +
+            Math.pow(m.lineAH - inputAH, 2) +
+            Math.pow(m.lineOU - inputOU, 2)
+        );
+        let similarity = Math.max(0, (1 - distance / 3) * 100);
+        return { ...m, similarity: similarity };
+    });
+
+    matches.sort((a, b) => b.similarity - a.similarity);
+    return matches.slice(0, 3);
+}
+
+function clearAllInputs() {
+    document.getElementById("homeTeam").value = "";
+    document.getElementById("awayTeam").value = "";
+    document.getElementById("oddsHome").value = "";
+    document.getElementById("oddsDraw").value = "";
+    document.getElementById("oddsAway").value = "";
+    document.getElementById("lineAH").value = "";
+    document.getElementById("lineOU").value = "";
+    document.getElementById("oddsOver").value = "";
+    document.getElementById("oddsUnder").value = "";
+    
+    document.getElementById("mainPickAH").innerText = "-";
+    document.getElementById("mainAHProb").innerText = "-";
+    document.getElementById("mainAHROI").innerText = "-";
+    
+    document.getElementById("mainPickOU").innerText = "-";
+    document.getElementById("mainOUProb").innerText = "-";
+    document.getElementById("mainOUROI").innerText = "-";
+    
+    document.getElementById("safePick").innerText = "-";
+    document.getElementById("safeProb").innerText = "-";
+    document.getElementById("safeROI").innerText = "-";
+    
+    document.getElementById("valuePick").innerText = "-";
+    document.getElementById("valueProb").innerText = "-";
+    document.getElementById("valueROI").innerText = "-";
+
+    document.getElementById("decisionAction").innerHTML = "-";
+    document.getElementById("marketTightness").innerText = "-";
+    document.getElementById("scorePick").innerText = "-";
+
+    document.getElementById("similarMatchesContainer").innerHTML = '<div class="empty-placeholder">-</div>';
+    document.getElementById("tableAHBody").innerHTML = '<tr><td colspan="5" style="text-align:center;">-</td></tr>';
+    document.getElementById("tableOUBody").innerHTML = '<tr><td colspan="5" style="text-align:center;">-</td></tr>';
+}
+
+function calculatePredictions() {
+    let rawHome = document.getElementById("homeTeam").value.trim();
+    let rawAway = document.getElementById("awayTeam").value.trim();
+    let rawOH = document.getElementById("oddsHome").value;
+    let rawOD = document.getElementById("oddsDraw").value;
+    let rawOA = document.getElementById("oddsAway").value;
+
+    if (!rawHome || !rawAway || !rawOH || !rawOD || !rawOA) {
+        clearAllInputs();
+        return;
+    }
+
+    let home = rawHome;
+    let away = rawAway;
+    let oH = parseFloat(rawOH);
+    let oD = parseFloat(rawOD);
+    let oA = parseFloat(rawOA);
+    let lineAH = parseFloat(document.getElementById("lineAH").value) || 0.0;
+    let lineOU = parseFloat(document.getElementById("lineOU").value) || 2.5;
+    let oOver = parseFloat(document.getElementById("oddsOver").value) || 1.9;
+    let oUnder = parseFloat(document.getElementById("oddsUnder").value) || 1.9;
+
+    let margin1X2 = (1/oH) + (1/oD) + (1/oA);
+    let pH = (1/oH) / margin1X2;
+    let pD = (1/oD) / margin1X2;
+    let pA = (1/oA) / margin1X2;
+
+    let marginOU = (1/oOver) + (1/oUnder);
+    let pOverPure = (1/oOver) / marginOU;
+    let pUnderPure = (1/oUnder) / marginOU;
+
+    let expGoalTotal = lineOU * (pOverPure >= 0.5 ? (1 + (pOverPure - 0.5) * 0.35) : (1 - (pUnderPure - 0.5) * 0.35));
+    let supremacy = (pH - pA) * 1.45;
+
+    let homeXG = Math.max(0.2, (expGoalTotal / 2) + (supremacy / 2));
+    let awayXG = Math.max(0.2, (expGoalTotal / 2) - (supremacy / 2));
+
+    let tightnessRatio = (0.04 + 0.08 * Math.abs(pH - pA)) * 100;
+    let isTightMarket = tightnessRatio > 6.5;
+    document.getElementById("marketTightness").innerText = isTightMarket ? `Ketat (${tightnessRatio.toFixed(1)}%)` : `Longgar (${tightnessRatio.toFixed(1)}%)`;
+
+    let homeAhProb = normalCDF(supremacy - lineAH);
+    let awayAhProb = 1 - homeAhProb;
+    let pickHomeAH = homeAhProb >= 0.5;
+    let mainAHText = pickHomeAH ? `${home} (${lineAH >= 0 ? '+' : ''}${lineAH.toFixed(2)})` : `${away} (${-lineAH >= 0 ? '+' : ''}${(-lineAH).toFixed(2)})`;
+    let mainAHPct = pickHomeAH ? homeAhProb : awayAhProb;
+    let mainAhRoi = calcROI(mainAHPct, 1.90);
+    document.getElementById("mainPickAH").innerText = mainAHText;
+    document.getElementById("mainAHProb").innerText = (mainAHPct * 100).toFixed(1) + "%";
+    document.getElementById("mainAHROI").innerHTML = formatROI(mainAhRoi);
+
+    let mainOUResult = getPoissonOU(homeXG + awayXG, lineOU);
+    let isOver = mainOUResult.over >= mainOUResult.under;
+    let mainOuProb = Math.max(mainOUResult.over, mainOUResult.under);
+    let mainOuRoi = calcROI(mainOuProb, isOver ? oOver : oUnder);
+
+    document.getElementById("mainPickOU").innerText = isOver ? `OVER ${lineOU}` : `UNDER ${lineOU}`;
+    document.getElementById("mainOUProb").innerText = (mainOuProb * 100).toFixed(1) + "%";
+    document.getElementById("mainOUROI").innerHTML = formatROI(mainOuRoi);
+
+    let safeText = pH >= pA ? `${home} (+0.50)` : `${away} (+0.50)`;
+    let safeProb = Math.max(pH, pA) + pD;
+    document.getElementById("safePick").innerText = safeText;
+    document.getElementById("safeProb").innerText = (safeProb * 100).toFixed(1) + "%";
+    document.getElementById("safeROI").innerHTML = formatROI(calcROI(safeProb, 1.42));
+
+    let candidates = [
+        { name: `${home} Straight`, prob: pH, odds: oH },
+        { name: `${away} Straight`, prob: pA, odds: oA },
+        { name: `Draw 1X2`, prob: pD, odds: oD },
+        { name: `Over ${lineOU}`, prob: mainOUResult.over, odds: oOver },
+        { name: `Under ${lineOU}`, prob: mainOUResult.under, odds: oUnder }
+    ];
+    let bestCandidate = candidates.reduce((max, c) => calcROI(c.prob, c.odds) > calcROI(max.prob, max.odds) ? c : max, candidates[0]);
+    let highestROI = calcROI(bestCandidate.prob, bestCandidate.odds);
+    document.getElementById("valuePick").innerText = bestCandidate.name;
+    document.getElementById("valueProb").innerText = (bestCandidate.prob * 100).toFixed(1) + "%";
+    document.getElementById("valueROI").innerHTML = formatROI(highestROI);
+
+    let isPickRecommended = (highestROI >= 2.5 && bestCandidate.prob >= 0.525) || (mainAhRoi >= 2.0 && mainAHPct >= 0.55);
+    let decisionBadge = isPickRecommended
+        ? `<span class="badge-pick">PICK: ${bestCandidate.name}</span>` 
+        : '<span class="badge-nopick">NO PICK (PASS)</span>';
+    document.getElementById("decisionAction").innerHTML = decisionBadge;
+
+    let maxScoreProb = 0, bestH = 0, bestA = 0;
+    for (let hG = 0; hG <= 5; hG++) {
+        for (let aG = 0; aG <= 5; aG++) {
+            let pScore = getDixonColesProb(hG, aG, homeXG, awayXG);
+            if (pScore > maxScoreProb) { maxScoreProb = pScore; bestH = hG; bestA = aG; }
+        }
+    }
+    document.getElementById("scorePick").innerText = `${bestH} - ${bestA}`;
+
+    let similarMatches = findSimilarMatches(oH, oD, oA, lineAH, lineOU);
+    let similarHTML = "";
+    similarMatches.forEach(m => {
+        similarHTML += `
+        <div class="similar-card">
+            <div class="similar-header">
+                <span><b>${m.date}</b> • ${m.league}</span>
+                <span class="similarity-badge">${m.similarity.toFixed(1)}% Match</span>
+            </div>
+            <div class="similar-matchup">
+                <span>${m.match}</span>
+                <span class="similar-score">${m.score}</span>
+            </div>
+            <div class="similar-odds">
+                <span>1xBet 1X2: ${m.oH}/${m.oD}/${m.oA}</span>
+                <span>AH: ${m.lineAH} | O/U: ${m.lineOU}</span>
+            </div>
+        </div>`;
+    });
+    document.getElementById("similarMatchesContainer").innerHTML = similarHTML;
+
+    let ahHTML = "";
+    for (let h = 5.0; h >= -5.0; h -= 0.25) {
+        let currentLine = parseFloat(h.toFixed(2));
+        let homeWinProb = normalCDF(supremacy - currentLine);
+        let rec = homeWinProb >= 0.50 ? `${home} (${currentLine >= 0 ? '+' : ''}${currentLine.toFixed(2)})` : `${away} (${-currentLine >= 0 ? '+' : ''}${(-currentLine).toFixed(2)})`;
+        let prob = homeWinProb >= 0.50 ? homeWinProb : 1 - homeWinProb;
+        let isLineTight = Math.abs(currentLine - lineAH) < 0.25;
+        
+        ahHTML += `<tr>
+            <td><b>${currentLine >= 0 ? '+' : ''}${currentLine.toFixed(2)}</b></td>
+            <td>${rec}</td>
+            <td><b>${(prob * 100).toFixed(1)}%</b></td>
+            <td>${formatROI(calcROI(prob, 1.92))}</td>
+            <td>${isLineTight ? '<span style="background:rgba(239,68,68,0.2);color:#ef4444;padding:2px 6px;border-radius:4px;font-size:0.75rem;">Ketat</span>' : '<span style="background:rgba(34,197,94,0.2);color:#22c55e;padding:2px 6px;border-radius:4px;font-size:0.75rem;">Longgar</span>'}</td>
+        </tr>`;
+    }
+    document.getElementById("tableAHBody").innerHTML = ahHTML;
+
+    let ouHTML = "";
+    for (let g = 0.0; g <= 5.0; g += 0.50) {
+        let currentGoal = parseFloat(g.toFixed(2));
+        let ouRes = getPoissonOU(homeXG + awayXG, currentGoal);
+        let pick = ouRes.over >= ouRes.under ? `OVER ${currentGoal.toFixed(2)}` : `UNDER ${currentGoal.toFixed(2)}`;
+        ouHTML += `<tr>
+            <td><b>${currentGoal.toFixed(2)}</b> Goal</td>
+            <td><b>${pick}</b></td>
+            <td>${(ouRes.over * 100).toFixed(1)}%</td>
+            <td>${(ouRes.under * 100).toFixed(1)}%</td>
+            <td>${formatROI(calcROI(ouRes.over, oOver))}</td>
+        </tr>`;
+    }
+    document.getElementById("tableOUBody").innerHTML = ouHTML;
+}
+
+window.onload = clearAllInputs;
+</script>
+
+</body>
+</html>
